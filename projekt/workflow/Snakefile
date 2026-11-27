@@ -78,3 +78,35 @@ rule blastn:
             -num_threads {threads} \
             -outfmt "6 {params.fields}" 2> {log}
         """
+# Etap 3 
+
+rule etap3:
+	input:
+		blast = f"{OUT}/02_blast/blast_raw.tsv",
+		snp_info = f"{OUT}/01_extract/dart_info_oneline.tsv"
+	output:
+        	f"{OUT}/03_snps/etap3.tsv"
+	conda:
+                "envs/python.yaml"
+	params:
+        	min_pident = config["min_pident"],
+        	min_aln_len = config["min_aln_len"]
+	script:
+        	"scripts/etap3.py"
+
+#Etap 4
+rule etap4:
+	input:
+        	snpy = f"{OUT}/03_snps/etap3.tsv",
+        	dart_csv = config["dart_csv"]
+	output:
+        	f"{OUT}/03_snps/etap4.tsv"
+	conda:
+        	"envs/python.yaml"
+	params:
+		header_row = config["dart_header_row"],
+		data_start_row = config["dart_data_start_row"],
+		id_col = config["dart_id_col"],
+		geno_start_col = config["dart_genotype_start_col"]
+	script:
+		"scripts/etap4.py"
